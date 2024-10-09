@@ -1,0 +1,16 @@
+version: '3'
+services:
+  mongo:
+    image: mongo:latest # Use the official MongoDB image
+    container_name: mongo # Name the MongoDB container
+    ports:
+      - '27017:27017' # Map MongoDB's default port to the host
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: toor
+      MONGO_INITDB_DATABASE: db
+    volumes:
+      - mongo-data:/data/db # Persist MongoDB data
+
+volumes:
+  mongo-data: # Named volume for MongoDB data persistence
