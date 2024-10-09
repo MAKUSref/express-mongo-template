@@ -1,14 +1,15 @@
 import mongoose from "mongoose";
 import { config } from ".";
+import Logger from "../utils/Logger";
 
 export default async function connectToMongo() {
   const db = mongoose.connection;
   db.on("error", (err) => {
-    console.error(err);
+    Logger.error(err);
   });
 
   db.once("connected", () => {
-    console.log("[database]: Connected to mongo database");
+    Logger.success("[database]: Connected to mongo database");
   });
 
   try { 
@@ -18,6 +19,6 @@ export default async function connectToMongo() {
       pass: config.databasePassword,
     });
   } catch (err) {
-    console.error(err);
+    Logger.error(err);
   }
 }
