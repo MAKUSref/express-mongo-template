@@ -2,7 +2,7 @@ import express, { Express } from "express";
 import cors from "cors";
 import connectToMongo from "./mongo.config";
 import Logger from "./logger.config";
-import { errorHandler } from "@/excpetion/errorHandlar";
+import { errorHandler } from "@/excpetion/errorHandler";
 
 class App {
   private static instance?: App;
@@ -13,7 +13,7 @@ class App {
     this.app.use(cors());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
-    this.app.all('*', errorHandler);
+    // this.app.all('*', errorHandler);
 
     this.initLogger();
     
