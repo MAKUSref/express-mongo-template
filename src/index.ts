@@ -8,7 +8,7 @@ import { ROLE } from "./modules/user/user.model";
 app.use("/user", userRouter);
 
 //@ts-ignore
-app.get("/ping", roleGuard([ROLE.ADMIN]), (req, res) => {
+app.get("/ping", roleGuard([ROLE.ADMIN, ROLE.USER]), (req, res) => {
   res.send("pong!!!");
 });
 

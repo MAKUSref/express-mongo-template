@@ -2,10 +2,12 @@ import { Request, Response } from "express";
 import { userService } from "./user.service";
 import { UserShemaType } from "./user.model";
 import { CustomRequest } from "@/utils/CustomRequest";
+import Logger from "@/config/logger.config";
 
-
-
-export async function createUser(req: CustomRequest<UserShemaType>, res: Response) {
+export async function createUser(
+  req: CustomRequest<UserShemaType>,
+  res: Response
+) {
   const { firstname, lastname, email, password } = req.body;
   const user = await userService.createUser({
     firstname,
@@ -18,19 +20,35 @@ export async function createUser(req: CustomRequest<UserShemaType>, res: Respons
 }
 
 interface LoginParamsInterface {
-  email: string,
-  password: string,
+  email: string;
+  password: string;
 }
 
-export async function loginUser(req: CustomRequest<LoginParamsInterface>, res: Response) {
+export async function loginUser(
+  req: CustomRequest<LoginParamsInterface>,
+  res: Response
+) {
   const { email, password } = req.body;
-  const tokens = await userService.loginUser({email, password})
+  const tokens = await userService.loginUser({ email, password });
   res.json(tokens);
   return;
 }
 
 export async function logoutUser(req: CustomRequest<null>, res: Response) {
-  const user = await userService.logoutUser();
+  const user = await userService.logoutUser(req);
+  res.json(user);
+  return;
+}
+
+export async function getUserByEmail(req: CustomRequest<null>, res: Response) {
+  const user = await userService.getUserByEmail(req.query?.email as string);
+  res.json(user);
+  return;
+}
+
+export async function deleteUser(req: CustomRequest<null>, res: Response) {
+  const user = await userService.deleteUser(req.query?.email as string);
+  Logger.warn(`User ${user._id} was deleted`)
   res.json(user);
   return;
 }

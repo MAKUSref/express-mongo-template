@@ -7,7 +7,14 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { config } from "@/config";
-import { generateAccessToken, generateRefreshToken } from "@/utils/authUtils";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  getUserInfo,
+} from "@/utils/authUtils";
+import { Request } from "express";
+import Logger from "@/config/logger.config";
+
 export async function createUser(data: {
   firstname: string;
   lastname: string;
@@ -45,11 +52,12 @@ export async function loginUser(data: { email: string; password: string }) {
       throw new Error("Login or password is incorrect");
     }
 
-    console.log(data.password, user);
-
     if (await bcrypt.compare(data.password, user.password)) {
       const accesstoken = generateAccessToken(user);
       const refreshtoken = generateRefreshToken(user);
+
+      user.refreshToken = [...user.refreshToken, refreshtoken];
+      user.save();
 
       return { accesstoken, refreshtoken };
     } else {
@@ -60,8 +68,39 @@ export async function loginUser(data: { email: string; password: string }) {
   }
 }
 
-export async function logoutUser() {}
+export async function logoutUser(req: Request) {
+  const decodedToken = getUserInfo(req);
+  if (!decodedToken)
+    throw new AppError("You are not logged in", HTTP_STATUS_CODE.UNAUTHORIZED);
 
-export async function logOutUser(data: { email: string }) {}
+  const user = await User.findById(decodedToken._id);
+  if (!user)
+    throw new AppError("You are not logged in", HTTP_STATUS_CODE.UNAUTHORIZED);
+
+  user.refreshToken = [];
+  user.save();
+}
+
+export async function getUserByEmail(email: string | undefined) {
+  if (!email) {
+    throw new AppError("User dose not exist", HTTP_STATUS_CODE.NOT_FOUND);
+  }
+
+  const user = await User.findOne({ email }, ["-password", "-__v"]);
+  if (!user)
+    throw new AppError("User dose not exist", HTTP_STATUS_CODE.NOT_FOUND);
+  return user;
+}
+
+export async function deleteUser(email: string | undefined) {
+  if (!email) {
+    throw new AppError("User dose not exist", HTTP_STATUS_CODE.NOT_FOUND);
+  }
+
+  const user = await User.findOneAndDelete({ email }, ["-password", "-__v"]);
+  if (!user)
+    throw new AppError("User dose not exist", HTTP_STATUS_CODE.NOT_FOUND);
+  return user;
+}
 
 export * as userService from "./user.service";
