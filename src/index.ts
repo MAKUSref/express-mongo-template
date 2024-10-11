@@ -2,10 +2,13 @@ import { config } from "./config";
 import Logger from "@/config/logger.config";
 import app from "@/config/app.config";
 import { userRouter } from "./modules/user/user.route";
+import { roleGuard } from "./utils/authUtils";
+import { ROLE } from "./modules/user/user.model";
 
 app.use("/user", userRouter);
 
-app.get("/ping", (req, res) => {
+//@ts-ignore
+app.get("/ping", roleGuard([ROLE.ADMIN]), (req, res) => {
   res.send("pong!!!");
 });
 

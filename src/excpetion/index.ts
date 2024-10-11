@@ -1,7 +1,7 @@
-import { HTTP_STAUS_CODE } from "./http";
+import { HTTP_STATUS_CODE } from "./http";
 
 class AppError extends Error {
-  constructor(public message: string, public statusCode = HTTP_STAUS_CODE.INTERNAL_SERVER_ERROR) {
+  constructor(public message: string, public statusCode = HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR) {
     super(message);
   }
 }

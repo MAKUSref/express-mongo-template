@@ -1,4 +1,4 @@
-export enum HTTP_STAUS_CODE {
+export enum HTTP_STATUS_CODE {
   OK = 200,
   CREATED = 201,
   ACCEPTED = 202,
