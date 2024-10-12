@@ -3,7 +3,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import * as fs from "fs";
 import * as path from "path";
 import { config } from "@/config";
-import { ROLE, UserShemaType } from "@/modules/user/user.model";
+import User, { ROLE, UserShemaType } from "@/modules/user/user.model";
 import AppError from "@/excpetion";
 import { HTTP_STATUS_CODE } from "@/excpetion/http";
 import { Document, Types } from "mongoose";
@@ -32,6 +32,24 @@ export const generateRefreshToken = (
     expiresIn: config.refreshTokenExpireTime,
   });
 
+export const refreshUserToken = async (refreshToken: string) => {
+  jwt.verify(refreshToken, config.tokenSecret, async function (err, decoded) {
+    if (err) {
+      throw new AppError("Invalid token", HTTP_STATUS_CODE.UNAUTHORIZED);
+    }
+
+    const user = await User.findById((decoded as JwtPayload)?._id)
+
+    if (!user) {
+      throw new AppError("User dose not exist", HTTP_STATUS_CODE.NOT_FOUND);
+    }
+
+    return generateAccessToken(user);
+
+
+  });
+}
+
 export const roleGuard = (roles: ROLE[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.slice(7);
@@ -59,7 +77,7 @@ export const roleGuard = (roles: ROLE[]) => {
 
 export const getUserInfo = (req: Request) => {
   const token = req.headers.authorization?.slice(7);
-  
+
   if (!token) {
     return null;
   }
