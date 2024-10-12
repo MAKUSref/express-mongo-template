@@ -1,7 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import * as fs from "fs";
-import * as path from "path";
 import { config } from "@/config";
 import { ROLE, UserShemaType } from "@/modules/user/user.model";
 import AppError from "@/excpetion";
@@ -37,21 +35,27 @@ export const roleGuard = (roles: ROLE[]) => {
     const token = req.headers.authorization?.slice(7);
 
     if (!token) {
-      throw new AppError(
-        "You need to log in first",
-        HTTP_STATUS_CODE.UNAUTHORIZED
-      );
+      res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({
+        message: "You need to log in first",
+      });
+      return;
     }
     jwt.verify(token, config.tokenSecret, function (err, decoded) {
       if (err) {
-        throw new AppError("Invalid token", HTTP_STATUS_CODE.UNAUTHORIZED);
+        res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({
+          message: "Invalid token",
+        });
+        return;
       }
       if (
         roles.some((item) => (decoded as UserShemaType)?.roles.includes(item))
       ) {
         next();
       } else {
-        throw new AppError("Access denied", HTTP_STATUS_CODE.FORBIDDEN);
+        res.status(HTTP_STATUS_CODE.FORBIDDEN).send({
+          message: "Access denied",
+        });
+        return;
       }
     });
   };
@@ -59,7 +63,7 @@ export const roleGuard = (roles: ROLE[]) => {
 
 export const getUserInfo = (req: Request) => {
   const token = req.headers.authorization?.slice(7);
-  
+
   if (!token) {
     return null;
   }
