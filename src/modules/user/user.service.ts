@@ -1,5 +1,5 @@
 import AppError from "@/excpetion";
-import User, { ROLE, UserShemaType } from "./user.model";
+import User, { ROLE } from "./user.model";
 import { HTTP_STATUS_CODE } from "@/excpetion/http";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -11,7 +11,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
   getUserInfo,
-} from "@/utils/authUtils";
+} from "@/modules/auth/auth.service";
 import { Request } from "express";
 import Logger from "@/config/logger.config";
 
@@ -81,23 +81,23 @@ export async function logoutUser(req: Request) {
   user.save();
 }
 
-export async function getUserByEmail(email: string | undefined) {
-  if (!email) {
+export async function getUserById(userId: string | undefined) {
+  if (!userId) {
     throw new AppError("User dose not exist", HTTP_STATUS_CODE.NOT_FOUND);
   }
 
-  const user = await User.findOne({ email }, ["-password", "-__v"]);
+  const user = await User.findOne({ _id: userId }, ["-password", "-__v"]);
   if (!user)
     throw new AppError("User dose not exist", HTTP_STATUS_CODE.NOT_FOUND);
   return user;
 }
 
-export async function deleteUser(email: string | undefined) {
-  if (!email) {
+export async function deleteUser(userId: string | undefined) {
+  if (!userId) {
     throw new AppError("User dose not exist", HTTP_STATUS_CODE.NOT_FOUND);
   }
 
-  const user = await User.findOneAndDelete({ email }, ["-password", "-__v"]);
+  const user = await User.findByIdAndDelete(userId);
   if (!user)
     throw new AppError("User dose not exist", HTTP_STATUS_CODE.NOT_FOUND);
   return user;
